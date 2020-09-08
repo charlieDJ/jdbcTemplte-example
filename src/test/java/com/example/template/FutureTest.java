@@ -1,5 +1,7 @@
 package com.example.template;
 
+import com.example.template.util.FutureUtil;
+import com.example.template.util.TimeoutDefault;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.*;
@@ -21,8 +23,7 @@ public class FutureTest {
     }
 
     public Future<String> calculateAsync() throws InterruptedException {
-        CompletableFuture<String> completableFuture
-                = new CompletableFuture<>();
+        CompletableFuture<String> completableFuture = new CompletableFuture<>();
 
         Executors.newCachedThreadPool().submit(() -> {
             Thread.sleep(500);
@@ -102,4 +103,31 @@ public class FutureTest {
         }
     }
 
+    @Test
+    public void timeoutTest() throws ExecutionException, InterruptedException {
+        CompletableFuture<String> future = FutureUtil.supplyAsync(() -> {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e1) {
+                // ignore
+            }
+            return "hi";
+        }, 1, TimeUnit.SECONDS, "default");
+        String str = future.get();
+        assertEquals("default", str);
+    }
+
+    @Test
+    public void timeoutTest2() throws ExecutionException, InterruptedException {
+        CompletableFuture<String> future = CompletableFuture
+                .supplyAsync(TimeoutDefault.with(() -> {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    return "future";
+                }, "default", 1000));
+        assertEquals("default", future.get());
+    }
 }
