@@ -3,10 +3,8 @@ package com.example.template;
 import com.example.template.function.SupplierWrapper;
 import com.example.template.mapper.EmployeeRowMapper;
 import com.example.template.model.Employee;
-import com.example.template.page.MySqlPage;
-import com.example.template.page.Page;
-import com.example.template.page.PageFactory;
-import com.example.template.page.SqlBuilder;
+import com.example.template.page.*;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -17,7 +15,10 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+@Slf4j
 public class TemplateTest extends TemplateApplicationTests {
 
     @Autowired
@@ -71,7 +72,7 @@ public class TemplateTest extends TemplateApplicationTests {
                 .setAfterFromSql(afterFromSql).build();
         Integer count = template.queryForObject(build.getCountSql(), Integer.class);
         System.out.println("count: " + count);
-        Page page = PageFactory.getPage(MySqlPage.class);
+        Page page = PageFactory.newInstance(MySqlPage.class);
         String pagedSql = page.startPage(build.getSql(), 2, 3);
         System.out.println("pagedSql: " + pagedSql);
         List<Employee> employee = jdbcTemplate.query(pagedSql, source, rowMapper);
@@ -115,6 +116,29 @@ public class TemplateTest extends TemplateApplicationTests {
         List<Employee> employees = jdbcTemplate.query(sqlBuilder.getSql(), parameterSource, BeanPropertyRowMapper.newInstance(Employee.class));
         System.out.println(employees);
     }
+
+    @Test
+    public void oraclePage(){
+        String sql = "select 1 from dual";
+        Page page = PageFactory.newInstance(OraclePage.class);
+        String pageSql = page.startPage(sql, 1, 20);
+        System.out.println("分页：" + pageSql);
+    }
+
+    @Test
+    public void newQuery(){
+        SqlBuilder.Builder builder = SqlBuilder.newInstance();
+        List<String> columns = Stream.of("firstname",
+                "address").collect(Collectors.toList());
+        builder.setColumns(columns)
+                .setAfterFromSql("EMPLOYEE")
+                .where("firstname = 'berry'")
+                .where("address = 'nanshan'");
+        SqlBuilder build = builder.build();
+        log.info("sql:{},countSql:{}", build.getSql(), build.getCountSql());
+    }
+
+
 
 
 }

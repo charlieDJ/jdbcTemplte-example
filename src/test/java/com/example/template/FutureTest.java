@@ -17,7 +17,6 @@ public class FutureTest {
     @Test
     public void simple() throws InterruptedException, ExecutionException {
         Future<String> completableFuture = calculateAsync();
-
         String result = completableFuture.get();
         assertEquals("Hello", result);
     }
@@ -129,5 +128,19 @@ public class FutureTest {
                     return "future";
                 }, "default", 1000));
         assertEquals("default", future.get());
+    }
+
+    @Test
+    public void timeoutTest3() throws ExecutionException, InterruptedException, TimeoutException {
+        CompletableFuture<String> future = CompletableFuture
+                .supplyAsync(()->{
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    return "default";
+                });
+        assertEquals("default", future.get(3, TimeUnit.SECONDS));
     }
 }

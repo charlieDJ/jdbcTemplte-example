@@ -3,11 +3,14 @@ package com.example.template.page;
 import org.springframework.util.StringUtils;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SqlBuilder {
 
-    private String sql;
-    private String countSql;
+    private final String sql;
+    private final String countSql;
 
 
     public String getSql() {
@@ -25,21 +28,46 @@ public class SqlBuilder {
         this.countSql = builder.countSql;
     }
 
+    public static Builder newInstance() {
+        return new Builder();
+    }
+
     public static class Builder {
-        private static final String BEFORE_FROM_SQL = " SELECT {0} FROM ";
+        private static final String STANDARD_SQL = " SELECT {0} FROM ";
         private static final String COUNT_SQL = " SELECT COUNT(1) FROM ";
         private String columns;
         private String afterFromSql;
         private String sql;
         private String countSql;
+        private final List<String> conditions = new ArrayList<>();
 
         public Builder setColumns(String columns) {
-            this.columns = columns;
+            if (this.columns == null) {
+                this.columns = columns;
+            } else {
+                this.columns = this.columns + "," + columns;
+            }
+            return this;
+        }
+
+        public Builder setColumns(List<String> columns) {
+            String newColumns = columns.stream().distinct()
+                    .collect(Collectors.joining(","));
+            if (this.columns == null) {
+                this.columns = newColumns;
+            } else {
+                this.columns = this.columns + "," + newColumns;
+            }
+            return this;
+        }
+
+        public Builder where(String condition) {
+            conditions.add(condition);
             return this;
         }
 
         public Builder setAfterFromSql(String afterFromSql) {
-            this.afterFromSql = afterFromSql;
+            this.afterFromSql = " " + afterFromSql + " ";
             return this;
         }
 
@@ -52,12 +80,17 @@ public class SqlBuilder {
             }
 
             if (StringUtils.isEmpty(afterFromSql)) {
-                throw new RuntimeException("没有传入表名及where语句");
+                throw new RuntimeException("表名或表连接不能为空");
             }
 
-            this.sql = MessageFormat.format(BEFORE_FROM_SQL, columns) + afterFromSql;
+            String whereClause = "";
+            if (!conditions.isEmpty()) {
+                whereClause = conditions.stream().collect(Collectors.joining(" AND ", " WHERE ", ""));
+            }
 
-            this.countSql = COUNT_SQL + afterFromSql;
+            this.sql = MessageFormat.format(STANDARD_SQL, columns) + afterFromSql +  whereClause;
+
+            this.countSql = COUNT_SQL +  afterFromSql  + whereClause;
 
             return new SqlBuilder(this);
         }
