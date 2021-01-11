@@ -22,10 +22,10 @@ import java.util.stream.Stream;
 public class TemplateTest extends TemplateApplicationTests {
 
     @Autowired
-    private NamedParameterJdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate parameterJdbcTemplate;
 
     @Autowired
-    private JdbcTemplate template;
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     public void insert() {
@@ -33,21 +33,21 @@ public class TemplateTest extends TemplateApplicationTests {
         Employee employee = new Employee();
         employee.setFirstName("bill" + 1).setLastName("gates" + 1).setAddress("china" + 1);
         SqlParameterSource source = new BeanPropertySqlParameterSource(employee);
-        jdbcTemplate.update("insert into EMPLOYEE(firstname,lastname,address) values(:firstName,:lastName,:address)",
+        parameterJdbcTemplate.update("insert into EMPLOYEE(firstname,lastname,address) values(:firstName,:lastName,:address)",
                 source, keyHolder);
         System.out.println(keyHolder.getKey());
     }
 
     @Test
     public void count() {
-        Integer count = template.queryForObject("select count(1) from EMPLOYEE", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("select count(1) from EMPLOYEE", Integer.class);
         System.out.println("count: " + count);
     }
 
     @Test
     public void selectForRows() {
         EmptySqlParameterSource source = new EmptySqlParameterSource();
-        Employee employee = jdbcTemplate.queryForObject("select * from EMPLOYEE where id = 1", source, new EmployeeRowMapper());
+        Employee employee = parameterJdbcTemplate.queryForObject("select * from EMPLOYEE where id = 1", source, new EmployeeRowMapper());
         System.out.println(employee);
     }
 
@@ -56,7 +56,7 @@ public class TemplateTest extends TemplateApplicationTests {
     public void selectForProperties() {
         EmptySqlParameterSource source = new EmptySqlParameterSource();
         BeanPropertyRowMapper<Employee> rowMapper = BeanPropertyRowMapper.newInstance(Employee.class);
-        List<Employee> employee = jdbcTemplate.query("select id,lastname,firstname,address from EMPLOYEE", source, rowMapper);
+        List<Employee> employee = parameterJdbcTemplate.query("select id,lastname,firstname,address from EMPLOYEE", source, rowMapper);
         for (Employee employee1 : employee) {
             System.out.println(employee1);
         }
@@ -70,12 +70,12 @@ public class TemplateTest extends TemplateApplicationTests {
         String afterFromSql = "EMPLOYEE";
         SqlBuilder build = new SqlBuilder.Builder().setColumns(columns)
                 .setAfterFromSql(afterFromSql).build();
-        Integer count = template.queryForObject(build.getCountSql(), Integer.class);
+        Integer count = jdbcTemplate.queryForObject(build.getCountSql(), Integer.class);
         System.out.println("count: " + count);
         Page page = PageFactory.newInstance(MySqlPage.class);
         String pagedSql = page.startPage(build.getSql(), 2, 3);
         System.out.println("pagedSql: " + pagedSql);
-        List<Employee> employee = jdbcTemplate.query(pagedSql, source, rowMapper);
+        List<Employee> employee = parameterJdbcTemplate.query(pagedSql, source, rowMapper);
         System.out.println(employee);
     }
 
@@ -88,7 +88,7 @@ public class TemplateTest extends TemplateApplicationTests {
         String afterFromSql = "EMPLOYEE where id = :id";
         SqlBuilder build = new SqlBuilder.Builder().setColumns(columns)
                 .setAfterFromSql(afterFromSql).build();
-        Employee wrappedEmployee = SupplierWrapper.wrap(() -> jdbcTemplate.queryForObject(build.getSql(), mapParameter, rowMapper));
+        Employee wrappedEmployee = SupplierWrapper.wrap(() -> parameterJdbcTemplate.queryForObject(build.getSql(), mapParameter, rowMapper));
         System.out.println(wrappedEmployee);
     }
 
@@ -97,12 +97,14 @@ public class TemplateTest extends TemplateApplicationTests {
         List<Employee> employees = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             Employee employee = new Employee();
-            employee.setFirstName("bill" + i).setLastName("gates" + i).setAddress("china" + i);
+            employee.setFirstName("bill" + i)
+                    .setLastName("gates" + i)
+                    .setAddress("china" + i);
             employees.add(employee);
         }
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(employees);
-        int[] updateCounts = jdbcTemplate.batchUpdate(
-                "INSERT INTO EMPLOYEE(firstname,lastname,address) VALUES (:firstName, :lastName, :address)", batch);
+        String sql = "INSERT INTO EMPLOYEE(firstname,lastname,address) VALUES (:firstName, :lastName, :address)";
+        int[] updateCounts = parameterJdbcTemplate.batchUpdate(sql, batch);
         System.out.println("updateCounts: " + Arrays.toString(updateCounts));
     }
 
@@ -113,7 +115,7 @@ public class TemplateTest extends TemplateApplicationTests {
         }};
         SqlBuilder sqlBuilder = new SqlBuilder.Builder().setColumns("*")
                 .setAfterFromSql("EMPLOYEE where firstname like :firstname").build();
-        List<Employee> employees = jdbcTemplate.query(sqlBuilder.getSql(), parameterSource, BeanPropertyRowMapper.newInstance(Employee.class));
+        List<Employee> employees = parameterJdbcTemplate.query(sqlBuilder.getSql(), parameterSource, BeanPropertyRowMapper.newInstance(Employee.class));
         System.out.println(employees);
     }
 
