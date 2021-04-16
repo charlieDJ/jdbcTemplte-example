@@ -1,14 +1,14 @@
 package com.example.template.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/test")
@@ -51,4 +51,21 @@ public class TestController {
             }
         };
     }
+
+    @GetMapping("/suspend")
+    public String suspend() throws InterruptedException {
+        Long sleep = (long) (Math.random() * (500 - 100)) + 100 ;
+        TimeUnit.MILLISECONDS.sleep(sleep);
+        return "1";
+    }
+
+    @PostMapping(value = "/upload", consumes = "multipart/form-data" )
+    public String upload(@RequestParam("file") MultipartFile file) throws IOException {
+        String destFilename = System.currentTimeMillis() + ".txt";
+//        Path path = Paths.get(URI.create("D:\\temp\\download" + File.separator + destFilename));
+        File file1 = new File("D:\\temp\\download" + File.separator + destFilename);
+        file.transferTo(file1);
+        return "1";
+    }
+
 }

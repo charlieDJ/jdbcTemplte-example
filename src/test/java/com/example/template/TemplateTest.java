@@ -33,8 +33,8 @@ public class TemplateTest extends TemplateApplicationTests {
         Employee employee = new Employee();
         employee.setFirstName("bill" + 1).setLastName("gates" + 1).setAddress("china" + 1);
         SqlParameterSource source = new BeanPropertySqlParameterSource(employee);
-        parameterJdbcTemplate.update("insert into EMPLOYEE(firstname,lastname,address) values(:firstName,:lastName,:address)",
-                source, keyHolder);
+        String sql = "insert into EMPLOYEE(firstname,lastname,address) values(:firstName,:lastName,:address)";
+        parameterJdbcTemplate.update(sql, source, keyHolder, new String[]{"id"});
         System.out.println(keyHolder.getKey());
     }
 
