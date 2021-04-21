@@ -52,7 +52,7 @@ public class EasyJdbc<T> {
      * @param obj 对象
      * @return namedParameterJdbcTemplate需要的insert语句
      */
-    public String generateInsert(T obj) {
+    public String getInsertSql(T obj) {
         Class<?> clazz = obj.getClass();
         if (clazz == Object.class) {
             print("传入对象不能是Object");
@@ -122,7 +122,10 @@ public class EasyJdbc<T> {
             print("批量插入列表为空");
             return false;
         }
-        String insert = generateInsert(list.get(0));
+        String insert = getInsertSql(list.get(0));
+        if (isEmpty(insert)) {
+            return false;
+        }
         if (list.size() > BATCH_SIZE) {
             // 分批次插入，缓解数据库压力
             List<List<T>> partitions = ListUtils.partition(list, BATCH_SIZE);
@@ -147,7 +150,7 @@ public class EasyJdbc<T> {
         if (Objects.isNull(t)) {
             throw new RuntimeException("插入对象不能为空");
         }
-        String insertSql = generateInsert(t);
+        String insertSql = getInsertSql(t);
         SqlParameterSource source = new BeanPropertySqlParameterSource(t);
         if (ID_AUTO_INCREMENT) {
             GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
@@ -219,12 +222,12 @@ public class EasyJdbc<T> {
     private static List<Class<?>> getSuperClasses(Class<?> clazz) {
         List<Class<?>> classes = new ArrayList<>();
         classes.add(clazz);
-        Class temp = clazz;
+        Class<?> temp = clazz;
         while (temp != null) {
             if (temp == Object.class) {
                 break;
             }
-            Class superclass = temp.getSuperclass();
+            Class<?> superclass = temp.getSuperclass();
             classes.add(superclass);
             temp = superclass;
         }
