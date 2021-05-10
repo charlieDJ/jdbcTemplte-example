@@ -12,8 +12,14 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     password: 123456
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://192.168.132.129/dj?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
-    username: root
+    url: jdbc:mysql://192.168.139.128/dj?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+    username: admin
+  jpa:
+    show-sql: true
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: update
 
 server:
   port: 8080

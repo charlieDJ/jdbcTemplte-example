@@ -1,6 +1,6 @@
 package com.example.template.mapper;
 
-import com.example.template.model.Employee;
+import com.example.template.entity.Employee;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -11,7 +11,7 @@ public class EmployeeRowMapper implements RowMapper<Employee> {
     public Employee mapRow(ResultSet rs, int rowNum) throws SQLException {
         Employee employee = new Employee();
 
-        employee.setId(rs.getLong("ID"));
+        employee.setId(rs.getInt("ID"));
         employee.setFirstName(rs.getString("FIRSTNAME"));
         employee.setLastName(rs.getString("LASTNAME"));
         employee.setAddress(rs.getString("ADDRESS"));

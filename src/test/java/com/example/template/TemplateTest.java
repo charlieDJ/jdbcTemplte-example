@@ -1,8 +1,8 @@
 package com.example.template;
 
+import com.example.template.entity.Employee;
 import com.example.template.function.SupplierWrapper;
 import com.example.template.mapper.EmployeeRowMapper;
-import com.example.template.model.Employee;
 import com.example.template.page.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
