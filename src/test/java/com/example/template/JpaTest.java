@@ -31,8 +31,8 @@ public class JpaTest extends TemplateApplicationTests {
     @Test
     public void save(){
         Employee employee = new Employee();
-        employee.setFirstName("lei")
-                .setLastName("tong")
+        employee.setFirstName("auditTest")
+                .setLastName("auditTest")
                 .setDeptId(1)
                 .setAddress("天池");
         employeeRepository.save(employee);
@@ -55,7 +55,7 @@ public class JpaTest extends TemplateApplicationTests {
 
     @Test
     public void update(){
-        Employee employee = employeeRepository.findById(1).get();
+        Employee employee = employeeRepository.findById(10).get();
         employee.setAddress("观音桥");
         employeeRepository.save(employee);
     }

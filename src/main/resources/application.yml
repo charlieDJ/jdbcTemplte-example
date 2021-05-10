@@ -9,10 +9,10 @@ spring:
       connection-timeout: 300000
       connection-test-query: SELECT 1
       register-mbeans: true
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     password: 123456
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://192.168.139.128/dj?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://192.168.139.128/dj?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=CTT&rewriteBatchedStatements=true
     username: admin
   jpa:
     show-sql: true
