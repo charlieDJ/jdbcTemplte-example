@@ -148,4 +148,18 @@ public class JpaTest extends TemplateApplicationTests {
         }
     }
 
+    @Test
+    public void saveBatch(){
+        List<Employee> list = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            Employee employee = new Employee();
+            employee.setFirstName("lei" + i)
+                    .setLastName("tong")
+                    .setDeptId(1)
+                    .setAddress("天池");
+            list.add(employee);
+        }
+        employeeRepository.saveBatch(list);
+    }
+
 }

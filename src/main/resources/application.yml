@@ -20,6 +20,15 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
       ddl-auto: update
-
+  redis:
+    host: 192.168.139.128
+    lettuce:
+      pool:
+        max-active: 512
+        max-wait: 10s
+        min-idle: 16
+    password: '123456'
+    port: 6379
+    timeout: 10s
 server:
   port: 8080
