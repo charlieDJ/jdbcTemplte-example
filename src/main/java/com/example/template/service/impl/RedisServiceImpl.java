@@ -4,8 +4,10 @@ import com.example.template.service.RedisService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +35,11 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public void set(String key, Object value, long time) {
-        valueOpts.set(key, value, time, TimeUnit.SECONDS);
+        if (time > 0) {
+            valueOpts.set(key, value, time, TimeUnit.SECONDS);
+        } else {
+            valueOpts.set(key, value);
+        }
     }
 
     @Override
@@ -43,21 +49,26 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Object get(String key) {
-        return valueOpts.get(key);
+        return key == null ? null : valueOpts.get(key);
     }
 
     @Override
-    public Boolean del(String key) {
-        return redisTemplate.delete(key);
-    }
-
-    @Override
-    public Long del(List<String> keys) {
-        return redisTemplate.delete(keys);
+    public Boolean del(String... key) {
+        if (key != null && key.length > 0) {
+            if (key.length == 1) {
+                redisTemplate.delete(key[0]);
+            } else {
+                redisTemplate.delete(Arrays.asList(key));
+            }
+        }
+        return false;
     }
 
     @Override
     public Boolean expire(String key, long time) {
+        if (time < 0) {
+            return true;
+        }
         return redisTemplate.expire(key, time, TimeUnit.SECONDS);
     }
 
@@ -73,11 +84,17 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Long incr(String key, long delta) {
+        validateDelta(delta);
         return valueOpts.increment(key, delta);
+    }
+
+    private void validateDelta(long delta) {
+        Assert.state(delta > 0, "因子必须大于0");
     }
 
     @Override
     public Long decr(String key, long delta) {
+        validateDelta(delta);
         return valueOpts.increment(key, -delta);
     }
 

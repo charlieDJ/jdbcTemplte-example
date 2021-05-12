@@ -3,9 +3,12 @@ package com.example.template;
 import com.example.template.model.Person;
 import com.example.template.service.RedisService;
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author dj
@@ -15,6 +18,8 @@ public class RedisTest extends TemplateApplicationTests {
 
     @Autowired
     private RedisService redisService;
+    @Autowired
+    private RedissonClient redissonClient;
 
     @Test
     public void set(){
@@ -48,6 +53,27 @@ public class RedisTest extends TemplateApplicationTests {
         hashMap.put("1", person);
         hashMap.put("2", person2);
         redisService.hSetAll("hashAll", hashMap);
+    }
+
+    @Test
+    public void redissonGet(){
+        RLock lock = redissonClient.getLock("lock");
+        lock.lock(30, TimeUnit.SECONDS);
+    }
+
+    @Test
+    public void setNull(){
+        redisService.set(null,"1");
+    }
+
+    @Test
+    public void setNullValue(){
+        redisService.set("1",null);
+    }
+
+    @Test
+    public void setHashNull(){
+        redisService.hSet("h:",null,"武威");
     }
 
 
