@@ -1,6 +1,7 @@
 package com.example.template.util;
 
 
+import com.example.template.annotation.UnderlyingColumn;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -74,10 +75,13 @@ public class EasyJdbc<T> {
                 }
                 // 不处理Transient，数据库不存在该字段
                 Transient aTransient = field.getAnnotation(Transient.class);
+                UnderlyingColumn underlyingColumn = field.getAnnotation(UnderlyingColumn.class);
                 if (Objects.nonNull(aTransient)) {
-                    continue;
+                    if(Objects.isNull(underlyingColumn)){
+                        continue;
+                    }
                 }
-                String fieldName = field.getName();
+                String fieldName =  field.getName();
                 String getMethod = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                 Object invoke = null;
                 try {
@@ -95,6 +99,9 @@ public class EasyJdbc<T> {
                 // 查看注解上是否有值
                 if (Objects.nonNull(column)) {
                     fieldName = column.name();
+                }
+                if(Objects.nonNull(underlyingColumn)){
+                    fieldName = underlyingColumn.name();
                 }
                 fields.add(fieldName);
                 values.add(":" + valueName);

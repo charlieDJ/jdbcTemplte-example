@@ -1,9 +1,5 @@
 package com.example.template.config;
 
-/**
- * @author dj
- * @date 2021/5/10
- */
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -16,26 +12,24 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import redis.clients.jedis.JedisPoolConfig;
 
-/**
- * Redis配置类
- * Created by macro on 2020/3/2.
- */
 @EnableCaching
 @Configuration
-public class RedisConfig extends CachingConfigurerSupport {
+public class CustomRedisConfig extends CachingConfigurerSupport {
 
 
     @Autowired
     private RedisProperties redisProperties;
 
-    @Bean(name = "myRedisTemplate")
+    @Bean(name = "customRedisTemplate")
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         GenericJackson2JsonRedisSerializer jsonRedisSerializer = new GenericJackson2JsonRedisSerializer();
@@ -59,13 +53,28 @@ public class RedisConfig extends CachingConfigurerSupport {
     }
 
     @Bean
-    public LettuceConnectionFactory redisConnectionFactory() {
+    public JedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration configuration =
-                new RedisStandaloneConfiguration(redisProperties.getHost(),redisProperties.getPort());
+                new RedisStandaloneConfiguration(redisProperties.getHost(), redisProperties.getPort());
         RedisPassword redisPassword = RedisPassword.of(redisProperties.getPassword());
         configuration.setDatabase(0);
         configuration.setPassword(redisPassword);
-        return new LettuceConnectionFactory(configuration);
+        JedisClientConfiguration.JedisPoolingClientConfigurationBuilder builder = (JedisClientConfiguration.JedisPoolingClientConfigurationBuilder) JedisClientConfiguration.builder();
+        builder.poolConfig(jedisPoolConfig());
+        JedisClientConfiguration jedisClientConfiguration = builder.build();
+        return new JedisConnectionFactory(configuration, jedisClientConfiguration);
+    }
+
+    /**
+     * 连接池配置信息
+     */
+    @Bean
+    public JedisPoolConfig jedisPoolConfig(){
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setMaxTotal(100);
+        jedisPoolConfig.setMinIdle(5);
+        jedisPoolConfig.setMaxWaitMillis(1000);
+        return jedisPoolConfig;
     }
 
 }

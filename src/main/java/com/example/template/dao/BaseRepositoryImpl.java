@@ -1,5 +1,6 @@
 package com.example.template.dao;
 
+import com.example.template.annotation.UnderlyingColumn;
 import com.example.template.util.SpringHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
@@ -106,17 +107,20 @@ public class BaseRepositoryImpl<T, ID extends Serializable>
                 }
                 // 不处理Transient，数据库不存在该字段
                 Transient aTransient = field.getAnnotation(Transient.class);
+                UnderlyingColumn underlyingColumn = field.getAnnotation(UnderlyingColumn.class);
                 if (Objects.nonNull(aTransient)) {
-                    continue;
+                    if(Objects.isNull(underlyingColumn)){
+                        continue;
+                    }
                 }
-                String fieldName = field.getName();
+                String fieldName =  field.getName();
                 String getMethod = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                 Object invoke = null;
                 try {
                     Method method = clazz.getMethod(getMethod);
                     invoke = method.invoke(obj);
                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                    log.error(e.getMessage());
+                    log.debug(e.getMessage());
                 }
                 // 过滤null
                 if (Objects.isNull(invoke)) {
@@ -127,6 +131,9 @@ public class BaseRepositoryImpl<T, ID extends Serializable>
                 // 查看注解上是否有值
                 if (Objects.nonNull(column)) {
                     fieldName = column.name();
+                }
+                if(Objects.nonNull(underlyingColumn)){
+                    fieldName = underlyingColumn.name();
                 }
                 fields.add(fieldName);
                 values.add(":" + valueName);

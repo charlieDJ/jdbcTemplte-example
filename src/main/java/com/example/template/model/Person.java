@@ -16,6 +16,7 @@ import lombok.experimental.Accessors;
 @ToString
 @EqualsAndHashCode
 public class Person {
+    private String id;
     String firstname;
     String lastname;
 }

@@ -1,6 +1,6 @@
 package com.example.template.service.impl;
 
-import com.example.template.service.RedisService;
+import com.example.template.service.BaseRedisService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
@@ -19,18 +19,18 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Service
-public class RedisServiceImpl implements RedisService {
+public class BaseRedisServiceImpl implements BaseRedisService {
 
-    @Resource(name = "myRedisTemplate")
+    @Resource(name = "customRedisTemplate")
     private RedisTemplate<String, Object> redisTemplate;
     // inject the template as ListOperations
-    @Resource(name = "myRedisTemplate")
+    @Resource(name = "customRedisTemplate")
     private ListOperations<String, Object> listOpts;
-    @Resource(name = "myRedisTemplate")
+    @Resource(name = "customRedisTemplate")
     private ValueOperations<String, Object> valueOpts;
-    @Resource(name = "myRedisTemplate")
+    @Resource(name = "customRedisTemplate")
     HashOperations<String, Object, Object> hashOpts;
-    @Resource(name = "myRedisTemplate")
+    @Resource(name = "customRedisTemplate")
     SetOperations<String, Object> setOpts;
 
     @Override

@@ -1,7 +1,7 @@
 package com.example.template;
 
 import com.example.template.model.Person;
-import com.example.template.service.RedisService;
+import com.example.template.service.BaseRedisService;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class RedisTest extends TemplateApplicationTests {
 
     @Autowired
-    private RedisService redisService;
+    private BaseRedisService redisService;
     @Autowired
     private RedissonClient redissonClient;
 
