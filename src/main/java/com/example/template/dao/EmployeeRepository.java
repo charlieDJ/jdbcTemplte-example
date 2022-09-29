@@ -2,6 +2,8 @@ package com.example.template.dao;
 
 import com.example.template.entity.Employee;
 import com.example.template.model.EmployeeVo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -27,4 +29,7 @@ public interface EmployeeRepository extends BaseRepository<Employee, Integer>, E
 
     @Query(value = "select * from EMPLOYEE where lastname = :lastname", nativeQuery = true)
     List<Employee> findByLastName(@Param("lastname") String lastname);
+
+    @Query(value = "select * from EMPLOYEE where lastname = :lastname", nativeQuery = true)
+    Page<Employee> findByLastNameTwo(@Param("lastname")String lastname, Pageable request);
 }

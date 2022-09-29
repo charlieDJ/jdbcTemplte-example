@@ -48,7 +48,7 @@ public class RedisTest extends TemplateApplicationTests {
         Person person2 = new Person();
         person2.setFirstname("zhao");
         person2.setLastname("se");
-        redisService.hSet("hash", "pseron", person);
+//        redisService.hSet("hash", "pseron", person);
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("1", person);
         hashMap.put("2", person2);

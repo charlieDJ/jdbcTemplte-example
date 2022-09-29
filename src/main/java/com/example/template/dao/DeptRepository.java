@@ -17,4 +17,6 @@ public interface DeptRepository extends JpaRepository<Dept, Integer> {
 
     @Query(value = "select id,dept_name deptName from dept where dept_name = ?1", nativeQuery = true)
     List<DeptVo> findDeptByName(String name);
+
+    List<Dept> findByDeptName(String deptName);
 }

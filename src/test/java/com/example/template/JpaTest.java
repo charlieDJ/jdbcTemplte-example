@@ -2,6 +2,7 @@ package com.example.template;
 
 import com.example.template.dao.DeptRepository;
 import com.example.template.dao.EmployeeRepository;
+import com.example.template.entity.Dept;
 import com.example.template.entity.Employee;
 import com.example.template.model.DeptVo;
 import com.example.template.model.EmployeeVo;
@@ -9,6 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,19 +32,22 @@ public class JpaTest extends TemplateApplicationTests {
     @Autowired
     private DeptRepository deptRepository;
 
+    @Transactional
     @Test
-    public void save(){
+    public void save() {
         Employee employee = new Employee();
-        employee.setFirstName("auditTest")
-                .setLastName("auditTest")
+        employee.setFirstName("save1")
+                .setLastName("save")
                 .setDeptId(1)
                 .setAddress("天池");
         employeeRepository.save(employee);
         System.out.println(employee.getId());
+        Optional<Employee> employeeOptional = employeeRepository.findById(employee.getId());
+        employeeOptional.ifPresent(System.out::println);
     }
 
     @Test
-    public void saveAll(){
+    public void saveAll() {
         List<Employee> list = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             Employee employee = new Employee();
@@ -54,14 +61,14 @@ public class JpaTest extends TemplateApplicationTests {
     }
 
     @Test
-    public void update(){
+    public void update() {
         Employee employee = employeeRepository.findById(10).get();
         employee.setAddress("观音桥");
         employeeRepository.save(employee);
     }
 
     @Test
-    public void delete(){
+    public void delete() {
         // 传入对象删除
         Employee employee = employeeRepository.findById(13).get();
         employeeRepository.delete(employee);
@@ -133,7 +140,7 @@ public class JpaTest extends TemplateApplicationTests {
     }
 
     @Test
-    public void getByDynamic(){
+    public void getByDynamic() {
         List<Employee> employees = employeeRepository.findDynamically("", "lei1", "天池");
         for (Employee employee : employees) {
             System.out.println(employee);
@@ -141,7 +148,7 @@ public class JpaTest extends TemplateApplicationTests {
     }
 
     @Test
-    public void getDeptByName(){
+    public void getDeptByName() {
         List<DeptVo> deptVos = deptRepository.findDeptByName("研发");
         for (DeptVo deptVo : deptVos) {
             System.out.println(deptVo.getDeptName());
@@ -149,7 +156,15 @@ public class JpaTest extends TemplateApplicationTests {
     }
 
     @Test
-    public void saveBatch(){
+    public void getByDeptName() {
+        List<Dept> deptVos = deptRepository.findByDeptName("研发");
+        for (Dept deptVo : deptVos) {
+            System.out.println(deptVo.getDeptName());
+        }
+    }
+
+    @Test
+    public void saveBatch() {
         List<Employee> list = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             Employee employee = new Employee();
@@ -161,5 +176,13 @@ public class JpaTest extends TemplateApplicationTests {
         }
         employeeRepository.saveBatch(list);
     }
+
+    @Test
+    public void findAllWithPagination() {
+        PageRequest request = PageRequest.of(1, 5);
+        Page<Employee> page = employeeRepository.findByLastNameTwo("tong", request);
+        System.out.println(page.getSize());
+    }
+
 
 }
